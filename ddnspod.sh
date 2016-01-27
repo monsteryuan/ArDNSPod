@@ -2,15 +2,19 @@
 #!/bin/sh
 
 #################################################
-# AnripDdns v5.07.07
+# AnripDdns v6.0
 # 基于DNSPod用户API实现的动态域名客户端
 # 作者: 若海[mail@anrip.com]
 # 介绍: http://www.anrip.com/ddnspod
-# 时间: 2015-07-07 10:25:00
+#	6.0修改者:MonserYuan, email: yuan@monsteryuan.com
+# 6.0为了用在小米路由上,增加了循环,每15分钟检测一次,
+# 如IP有变化就更新, 把原有email&pass验证更新为最新
+# 的Token验证,详情https://support.dnspod.cn/Kb/showarticle/tsid/227/
+# 时间: 2016-01-27 15:25:00
 #################################################
 
 # 全局变量表
-arPass=arMail=""
+arToken=""
 
 # 获得外网地址
 arIpAdress() {
@@ -28,9 +32,9 @@ arNslookup() {
 # 读取接口数据
 # 参数: 接口类型 待提交数据
 arApiPost() {
-    local agent="AnripDdns/5.07(mail@anrip.com)"
+    local agent="AnripDdns_yuan/5.08(yuan@monsteryuan.com)"
     local inter="https://dnsapi.cn/${1:?'Info.Version'}"
-    local param="login_email=${arMail}&login_password=${arPass}&format=json&${2}"
+    local param="login_token=${arToken}&format=json&${2}"
     wget --quiet --no-check-certificate --output-document=- --user-agent=$agent --post-data $param $inter
 }
 
@@ -76,10 +80,11 @@ arDdnsCheck() {
 
 ###################################################
 
-# 设置用户参数
-arMail="user@anrip.com"
-arPass="anrip.net"
+# 设置用户参数 设为"ID,Token"
+arToken="id,token"
 
-# 检查更新域名
-arDdnsCheck "anrip.com" "lab"
-arDdnsCheck "anrip.net" "lab"
+# 检查更新域名 sleep可改 单位为分钟
+while [ 1 ];do
+				arDdnsCheck "anrip.com" "lab"
+				sleep 900
+done
